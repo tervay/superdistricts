@@ -5,10 +5,12 @@ mod tba;
 use protobuf;
 use protobuf::Message;
 use protos::Team::Team;
+use std::env;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::path::Path;
 use std::{thread, time};
+use webbrowser;
 
 fn get_file(fp: String) -> File {
     return OpenOptions::new()
@@ -37,16 +39,10 @@ fn file_exists(fp: String) -> bool {
     return Path::new(fp.as_str()).exists();
 }
 
-#[tokio::main]
-async fn main() -> Result<(), ()> {
-    // let mut team: protos::Team::Team = tba::get_team("frc2791").await;
-    // geo::populate_coords(&mut team).await;
-    // let result = save_proto(&team);
-    // println!("{:#?}", load_proto("frc1"));
-
+fn download() {
     let one_sec = time::Duration::from_secs_f32(1.15);
 
-    let mut teams = tba::get_all_teams().await;
+    let mut teams = tba::get_all_teams();
     for team in teams.iter_mut() {
         if file_exists(format!("cache/{}", team.key)) {
             println!("Skipping {}", team.key);
@@ -54,10 +50,46 @@ async fn main() -> Result<(), ()> {
         }
 
         println!("{}", team.key);
-        geo::populate_coords(team).await;
-        save_proto(team);
+        geo::populate_coords(team);
+        save_proto(team).expect("asdf");
         thread::sleep(one_sec);
     }
+}
 
-    Ok(())
+fn debug() {
+    let mut team: protos::Team::Team = tba::get_team("frc2791");
+    geo::populate_coords(&mut team);
+    let result = save_proto(&team);
+    result.expect("msg");
+    println!("{:#?}", load_proto("frc1"));
+}
+
+fn search(team_key: &str) {
+    let mut team = tba::get_team(team_key);
+    geo::fix_geo(&mut team);
+    let client = reqwest::blocking::Client::new()
+        .get("https://nominatim.openstreetmap.org/search")
+        .header(reqwest::header::USER_AGENT, "FRC SD model")
+        .query(&[
+            ("city", team.city.to_string()),
+            ("state", team.state.to_string()),
+            ("country", team.country.to_string()),
+            ("format", "json".to_string()),
+        ])
+        .build()
+        .unwrap();
+
+    let url = client.url();
+    webbrowser::open(url.as_str()).expect("Unable to open url");
+}
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    match args.get(1).expect("wrong usage").as_str() {
+        "download" => download(),
+        "debug" => debug(),
+        "search" => search(args.get(2).expect("missing 2nd arg")),
+        _ => panic!("Wrong usage"),
+    };
 }

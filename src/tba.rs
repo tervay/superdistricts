@@ -1,21 +1,21 @@
 static TBA_KEY: &str = "FfBdTrj0DX7qOqbIaLYYQ0i5HemtJYC2S6OlYl12ODrFdjdpMwG176m0zcL2Jtwn";
 static TBA_URL: &str = "https://www.thebluealliance.com/api/v3/";
 
+const SKIPLIST: &[&str] = &["frc6083"];
+
 fn form_url(path: String) -> String {
     let mut string = String::from(TBA_URL);
     string.push_str(path.as_str());
     return string;
 }
 
-async fn get(path: String) -> serde_json::Value {
-    return reqwest::Client::new()
+fn get(path: String) -> serde_json::Value {
+    return reqwest::blocking::Client::new()
         .get(form_url(path).as_str())
         .header("X-TBA-Auth-Key", TBA_KEY)
         .send()
-        .await
         .unwrap()
         .json()
-        .await
         .unwrap();
 }
 
@@ -30,18 +30,22 @@ fn json_to_team(json: &serde_json::Value) -> crate::protos::Team::Team {
     return team;
 }
 
-pub async fn get_team(team_key: &str) -> crate::protos::Team::Team {
-    let json = get(format!("team/{}", team_key)).await;
+pub fn get_team(team_key: &str) -> crate::protos::Team::Team {
+    let json = get(format!("team/{}", team_key));
     return json_to_team(&json);
 }
 
-pub async fn get_all_teams() -> std::vec::Vec<crate::protos::Team::Team> {
+pub fn get_all_teams() -> std::vec::Vec<crate::protos::Team::Team> {
     let mut vec = std::vec![];
 
     for page in 0..17 {
-        let json = get(format!("teams/2020/{}", page)).await;
+        let json = get(format!("teams/2020/{}", page));
         for team in json.as_array().unwrap() {
-            vec.push(json_to_team(&team));
+            let team = json_to_team(&team);
+            if SKIPLIST.contains(&team.key.to_string().as_str()) {
+                continue;
+            }
+            vec.push(team);
         }
     }
 

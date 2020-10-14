@@ -38,7 +38,7 @@ pub async fn get_team(team_key: &str) -> crate::protos::Team::Team {
 pub async fn get_all_teams() -> std::vec::Vec<crate::protos::Team::Team> {
     let mut vec = std::vec![];
 
-    for page in 0..14 {
+    for page in 0..17 {
         let json = get(format!("teams/2020/{}", page)).await;
         for team in json.as_array().unwrap() {
             vec.push(json_to_team(&team));

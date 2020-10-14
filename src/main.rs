@@ -7,6 +7,7 @@ use protobuf::Message;
 use protos::Team::Team;
 use std::fs::File;
 use std::fs::OpenOptions;
+use std::path::Path;
 use std::{thread, time};
 
 fn get_file(fp: String) -> File {
@@ -32,6 +33,10 @@ fn load_proto(team_key: &str) -> Team {
     return res.unwrap();
 }
 
+fn file_exists(fp: String) -> bool {
+    return Path::new(fp.as_str()).exists();
+}
+
 #[tokio::main]
 async fn main() -> Result<(), ()> {
     // let mut team: protos::Team::Team = tba::get_team("frc2791").await;
@@ -43,6 +48,11 @@ async fn main() -> Result<(), ()> {
 
     let mut teams = tba::get_all_teams().await;
     for team in teams.iter_mut() {
+        if file_exists(format!("cache/{}", team.key)) {
+            println!("Skipping {}", team.key);
+            continue;
+        }
+
         println!("{}", team.key);
         geo::populate_coords(team).await;
         save_proto(team);

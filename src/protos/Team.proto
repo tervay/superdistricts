@@ -12,4 +12,6 @@ message Team {
   string state = 4;
   string country = 5;
   string postal_code = 6;
+  float latitude = 7;
+  float longitude = 8;
 }

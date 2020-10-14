@@ -32,6 +32,8 @@ pub struct Team {
     pub state: ::protobuf::Chars,
     pub country: ::protobuf::Chars,
     pub postal_code: ::protobuf::Chars,
+    pub latitude: f32,
+    pub longitude: f32,
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
@@ -203,6 +205,36 @@ impl Team {
     pub fn take_postal_code(&mut self) -> ::protobuf::Chars {
         ::std::mem::replace(&mut self.postal_code, ::protobuf::Chars::new())
     }
+
+    // float latitude = 7;
+
+
+    pub fn get_latitude(&self) -> f32 {
+        self.latitude
+    }
+    pub fn clear_latitude(&mut self) {
+        self.latitude = 0.;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_latitude(&mut self, v: f32) {
+        self.latitude = v;
+    }
+
+    // float longitude = 8;
+
+
+    pub fn get_longitude(&self) -> f32 {
+        self.longitude
+    }
+    pub fn clear_longitude(&mut self) {
+        self.longitude = 0.;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_longitude(&mut self, v: f32) {
+        self.longitude = v;
+    }
 }
 
 impl ::protobuf::Message for Team {
@@ -231,6 +263,20 @@ impl ::protobuf::Message for Team {
                 },
                 6 => {
                     ::protobuf::rt::read_singular_proto3_carllerche_string_into(wire_type, is, &mut self.postal_code)?;
+                },
+                7 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeFixed32 {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_float()?;
+                    self.latitude = tmp;
+                },
+                8 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeFixed32 {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_float()?;
+                    self.longitude = tmp;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -262,6 +308,12 @@ impl ::protobuf::Message for Team {
         if !self.postal_code.is_empty() {
             my_size += ::protobuf::rt::string_size(6, &self.postal_code);
         }
+        if self.latitude != 0. {
+            my_size += 5;
+        }
+        if self.longitude != 0. {
+            my_size += 5;
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
@@ -285,6 +337,12 @@ impl ::protobuf::Message for Team {
         }
         if !self.postal_code.is_empty() {
             os.write_string(6, &self.postal_code)?;
+        }
+        if self.latitude != 0. {
+            os.write_float(7, self.latitude)?;
+        }
+        if self.longitude != 0. {
+            os.write_float(8, self.longitude)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -354,6 +412,16 @@ impl ::protobuf::Message for Team {
                 |m: &Team| { &m.postal_code },
                 |m: &mut Team| { &mut m.postal_code },
             ));
+            fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeFloat>(
+                "latitude",
+                |m: &Team| { &m.latitude },
+                |m: &mut Team| { &mut m.latitude },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeFloat>(
+                "longitude",
+                |m: &Team| { &m.longitude },
+                |m: &mut Team| { &mut m.longitude },
+            ));
             ::protobuf::reflect::MessageDescriptor::new_pb_name::<Team>(
                 "Team",
                 fields,
@@ -376,6 +444,8 @@ impl ::protobuf::Clear for Team {
         ::protobuf::Clear::clear(&mut self.state);
         ::protobuf::Clear::clear(&mut self.country);
         ::protobuf::Clear::clear(&mut self.postal_code);
+        self.latitude = 0.;
+        self.longitude = 0.;
         self.unknown_fields.clear();
     }
 }
@@ -393,12 +463,14 @@ impl ::protobuf::reflect::ProtobufValue for Team {
 }
 
 static file_descriptor_proto_data: &'static [u8] = b"\
-    \n\nTeam.proto\"\x9f\x01\n\x04Team\x12\x12\n\x03key\x18\x01\x20\x01(\tR\
+    \n\nTeam.proto\"\xdd\x01\n\x04Team\x12\x12\n\x03key\x18\x01\x20\x01(\tR\
     \x03keyB\0\x12\x14\n\x04name\x18\x02\x20\x01(\tR\x04nameB\0\x12\x14\n\
     \x04city\x18\x03\x20\x01(\tR\x04cityB\0\x12\x16\n\x05state\x18\x04\x20\
     \x01(\tR\x05stateB\0\x12\x1a\n\x07country\x18\x05\x20\x01(\tR\x07country\
-    B\0\x12!\n\x0bpostal_code\x18\x06\x20\x01(\tR\npostalCodeB\0:\0B\x08\xa0\
-    \xa7\x08\x01\x98\xa7\x08\x01b\x06proto3\
+    B\0\x12!\n\x0bpostal_code\x18\x06\x20\x01(\tR\npostalCodeB\0\x12\x1c\n\
+    \x08latitude\x18\x07\x20\x01(\x02R\x08latitudeB\0\x12\x1e\n\tlongitude\
+    \x18\x08\x20\x01(\x02R\tlongitudeB\0:\0B\x08\x98\xa7\x08\x01\xa0\xa7\x08\
+    \x01b\x06proto3\
 ";
 
 static file_descriptor_proto_lazy: ::protobuf::rt::LazyV2<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::rt::LazyV2::INIT;

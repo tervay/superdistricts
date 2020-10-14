@@ -7,6 +7,7 @@ use protobuf::Message;
 use protos::Team::Team;
 use std::fs::File;
 use std::fs::OpenOptions;
+use std::{thread, time};
 
 fn get_file(fp: String) -> File {
     return OpenOptions::new()
@@ -36,8 +37,17 @@ async fn main() -> Result<(), ()> {
     // let mut team: protos::Team::Team = tba::get_team("frc2791").await;
     // geo::populate_coords(&mut team).await;
     // let result = save_proto(&team);
+    // println!("{:#?}", load_proto("frc1"));
 
-    println!("{:#?}", load_proto("frc2791"));
+    let one_sec = time::Duration::from_secs_f32(1.15);
+
+    let mut teams = tba::get_all_teams().await;
+    for team in teams.iter_mut() {
+        println!("{}", team.key);
+        geo::populate_coords(team).await;
+        save_proto(team);
+        thread::sleep(one_sec);
+    }
 
     Ok(())
 }

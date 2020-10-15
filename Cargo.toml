@@ -14,6 +14,8 @@ serde = { version = "1.0", features = ["derive"] }
 protobuf = { version = "2", features = ["with-bytes"] }
 geocoding = "0.3.0"
 webbrowser = "0.5.5"
+geoutils = "0.4.0"
+indicatif = "0.15.0"
 
 [build-dependencies]
 protobuf-codegen-pure = "2.3"

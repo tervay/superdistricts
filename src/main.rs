@@ -1,3 +1,4 @@
+mod cluster;
 mod geo;
 mod protos;
 mod tba;
@@ -6,6 +7,7 @@ use protobuf;
 use protobuf::Message;
 use protos::Team::Team;
 use std::env;
+use std::fs;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::path::Path;
@@ -33,6 +35,15 @@ fn load_proto(team_key: &str) -> Team {
     let res = protobuf::parse_from_reader::<Team>(&mut reader);
 
     return res.unwrap();
+}
+
+fn load_all_protos() -> Vec<Team> {
+    let paths = fs::read_dir("cache/").unwrap();
+
+    return paths
+        .into_iter()
+        .map(|p| load_proto(p.unwrap().file_name().to_str().unwrap()))
+        .collect();
 }
 
 fn file_exists(fp: String) -> bool {
@@ -83,6 +94,14 @@ fn search(team_key: &str) {
     webbrowser::open(url.as_str()).expect("Unable to open url");
 }
 
+fn cluster() {
+    let mut c = cluster::make_clusterer(load_all_protos());
+    c.compute_scores();
+
+    println!("{:#?}", c.points.get(0).unwrap());
+    println!("{:#?}", c.points.last().unwrap());
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -90,6 +109,7 @@ fn main() {
         "download" => download(),
         "debug" => debug(),
         "search" => search(args.get(2).expect("missing 2nd arg")),
+        "cluster" => cluster(),
         _ => panic!("Wrong usage"),
     };
 }

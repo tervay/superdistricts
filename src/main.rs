@@ -3,6 +3,7 @@ mod geo;
 mod protos;
 mod tba;
 
+use geoutils::Location;
 use protobuf;
 use protobuf::Message;
 use protos::Team::Team;
@@ -13,6 +14,12 @@ use std::fs::OpenOptions;
 use std::path::Path;
 use std::{thread, time};
 use webbrowser;
+
+impl Team {
+    pub fn get_loc(&self) -> Location {
+        return Location::new(self.latitude, self.longitude);
+    }
+}
 
 fn get_file(fp: String) -> File {
     return OpenOptions::new()

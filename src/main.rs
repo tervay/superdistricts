@@ -104,9 +104,9 @@ fn search(team_key: &str) {
 fn cluster() {
     let mut c = cluster::make_clusterer(load_all_protos());
     c.compute_scores();
+    c.iterate();
 
-    println!("{:#?}", c.points.get(0).unwrap());
-    println!("{:#?}", c.points.last().unwrap());
+    println!("{:#?}", c.clusters);
 }
 
 fn main() {

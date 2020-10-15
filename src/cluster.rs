@@ -21,6 +21,23 @@ pub struct Cluster {
     pub points: Vec<Point>,
 }
 
+impl Cluster {
+    pub fn get_centroid(&self) -> Location {
+        let mut x = 0.0;
+        let mut y = 0.0;
+
+        for point in &self.points {
+            x += point.team.latitude;
+            y += point.team.longitude;
+        }
+
+        return Location::new(
+            x / (self.points.len() as f32),
+            y / (self.points.len() as f32),
+        );
+    }
+}
+
 #[derive(Debug)]
 pub struct Clusterer {
     pub points: Vec<Point>,
@@ -45,6 +62,50 @@ impl Clusterer {
         }
         self.points
             .sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap());
+    }
+
+    pub fn clear_clusters(&mut self) {
+        for cluster in self.clusters.iter_mut() {
+            cluster.points.clear();
+        }
+    }
+
+    pub fn assign_pt_to_nearest_cluster(&mut self, point: Point) {
+        self.clusters
+            .iter_mut()
+            .min_by(|a, b| {
+                point
+                    .team
+                    .get_loc()
+                    .distance_to(&a.location)
+                    .unwrap()
+                    .meters()
+                    .partial_cmp(
+                        &point
+                            .team
+                            .get_loc()
+                            .distance_to(&b.location)
+                            .unwrap()
+                            .meters(),
+                    )
+                    .unwrap()
+            })
+            .unwrap()
+            .points
+            .push(point);
+    }
+
+    pub fn iterate(&mut self) {
+        let old_clusters = self.clusters.iter().clone();
+        let points = self.points.clone();
+        self.clear_clusters();
+        for point in points.into_iter().progress() {
+            self.assign_pt_to_nearest_cluster(point);
+        }
+
+        for cluster in self.clusters.iter_mut() {
+            cluster.location = cluster.get_centroid();
+        }
     }
 }
 
